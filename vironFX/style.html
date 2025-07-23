@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Viron FX - Trade Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      background: #1a1a2e;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      width: 100%;
+    }
+    form, .stats {
+      background: white;
+      padding: 1rem;
+      margin: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 500px;
+    }
+    label {
+      display: block;
+      margin-top: 0.5rem;
+    }
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.2rem;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: #16213e;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .logo {
+      width: 100px;
+      margin: 0 auto;
+      display: block;
+    }
+    .footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://i.imgur.com/BP1n7ET.png" alt="Viron Setup Logo" class="logo">
+    <h1>Viron FX - Trade & Expense Tracker</h1>
+  </header>
+  <form id="tradeForm">
+    <label>Capital ($):
+      <input type="number" id="capital" required />
+    </label>
+    <label>Profit Today ($):
+      <input type="number" id="profit" required />
+    </label>
+    <label>Expenses ($):
+      <input type="number" id="expenses" required />
+    </label>
+    <label>Daily Drawdown Allowed ($):
+      <input type="number" id="drawdown" required />
+    </label>
+    <button type="submit">Save Trade</button>
+    <button type="button" onclick="resetData()" style="background: #d9534f;">Reset Data</button>
+  </form>
+  <div class="stats">
+    <h3>Current Status</h3>
+    <p><strong>Total Capital:</strong> <span id="totalCapital">$60</span></p>
+    <p><strong>Total Profits:</strong> <span id="totalProfits">$0</span></p>
+    <p><strong>Total Expenses:</strong> <span id="totalExpenses">$0</span></p>
+  </div>
+  <div class="footer">
+    &copy; 2025 Viron FX | Gold Trading XAUUSD Portal
+  </div>
+
+  <script>
+    let capital = 60;
+    let profits = 0;
+    let expenses = 0;
+
+    document.getElementById("tradeForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const addedCapital = parseFloat(document.getElementById("capital").value);
+      const todayProfit = parseFloat(document.getElementById("profit").value);
+      const todayExpense = parseFloat(document.getElementById("expenses").value);
+      const drawdownLimit = parseFloat(document.getElementById("drawdown").value);
+
+      if (todayProfit < -drawdownLimit) {
+        alert("Drawdown exceeded! Reduce your losses.");
+        return;
+      }
+
+      capital = addedCapital;
+      profits += todayProfit;
+      expenses += todayExpense;
+
+      updateStats();
+      document.getElementById("tradeForm").reset();
+    });
+
+    function updateStats() {
+      document.getElementById("totalCapital").innerText = `$${capital.toFixed(2)}`;
+      document.getElementById("totalProfits").innerText = `$${profits.toFixed(2)}`;
+      document.getElementById("totalExpenses").innerText = `$${expenses.toFixed(2)}`;
+    }
+
+    function resetData() {
+      if (confirm("Are you sure you want to reset everything?")) {
+        capital = 60;
+        profits = 0;
+        expenses = 0;
+        updateStats();
+      }
+    }
+
+    updateStats();
+  </script>
+</body>
+</html>
