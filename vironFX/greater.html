@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dr. Viron's Trading Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #1f4037, #99f2c8);
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: white;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #006d77;
+      color: white;
+    }
+    .win {
+      background-color: #d4edda;
+    }
+    .loss {
+      background-color: #f8d7da;
+    }
+    canvas {
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 40px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 8px 20px;
+      background: #00b4d8;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0077b6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Dr. Viron's Forex Trading Dashboard (15% Compounding)</h1>
+    <table id="trading-table">
+      <thead>
+        <tr>
+          <th>Day</th>
+          <th>Balance</th>
+          <th>Result</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+    <button onclick="resetTable()">Reset</button>
+    <canvas id="lineChart"></canvas>
+    <canvas id="pieChart"></canvas>
+  </div>
+
+  <script>
+    const tbody = document.querySelector("#trading-table tbody");
+    let balance = 100;
+    let wins = 0;
+    let losses = 0;
+    let balances = [balance];
+    let days = ["Day 0"];
+
+    function updateCharts() {
+      lineChart.data.labels = days;
+      lineChart.data.datasets[0].data = balances;
+      lineChart.update();
+
+      pieChart.data.datasets[0].data = [wins, losses];
+      pieChart.update();
+    }
+
+    function addRow(dayNum) {
+      const tr = document.createElement("tr");
+      const winBtn = document.createElement("button");
+      winBtn.innerText = "Win";
+      winBtn.onclick = () => markResult(tr, "win", dayNum);
+
+      const lossBtn = document.createElement("button");
+      lossBtn.innerText = "Loss";
+      lossBtn.onclick = () => markResult(tr, "loss", dayNum);
+
+      tr.innerHTML = `
+        <td>Day ${dayNum}</td>
+        <td id="bal-${dayNum}">$${balance.toFixed(2)}</td>
+        <td class="result">-</td>
+        <td></td>
+      `;
+
+      tr.children[3].appendChild(winBtn);
+      tr.children[3].appendChild(lossBtn);
+      tbody.appendChild(tr);
+    }
+
+    function markResult(row, type, dayNum) {
+      if (row.classList.contains("win") || row.classList.contains("loss")) return;
+
+      const resultCell = row.querySelector(".result");
+      if (type === "win") {
+        balance += balance * 0.15;
+        wins++;
+        row.classList.add("win");
+        resultCell.textContent = "Win (+15%)";
+      } else {
+        balance -= balance * 0.10;
+        losses++;
+        row.classList.add("loss");
+        resultCell.textContent = "Loss (-10%)";
+      }
+      row.querySelector(`#bal-${dayNum}`).textContent = `$${balance.toFixed(2)}`;
+      balances.push(balance);
+      days.push(`Day ${dayNum}`);
+      updateCharts();
+      if (dayNum < 22) addRow(dayNum + 1);
+    }
+
+    function resetTable() {
+      tbody.innerHTML = "";
+      balance = 100;
+      wins = 0;
+      losses = 0;
+      balances = [balance];
+      days = ["Day 0"];
+      addRow(1);
+      updateCharts();
+    }
+
+    const lineChart = new Chart(document.getElementById("lineChart"), {
+      type: 'line',
+      data: {
+        labels: days,
+        datasets: [{
+          label: 'Balance Over Time',
+          borderColor: '#264653',
+          backgroundColor: 'rgba(38,70,83,0.2)',
+          data: balances,
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: false
+          }
+        }
+      }
+    });
+
+    const pieChart = new Chart(document.getElementById("pieChart"), {
+      type: 'pie',
+      data: {
+        labels: ['Wins', 'Losses'],
+        datasets: [{
+          data: [wins, losses],
+          backgroundColor: ['#2a9d8f', '#e76f51']
+        }]
+      },
+      options: {
+        responsive: true
+      }
+    });
+
+    resetTable();
+  </script>
+</body>
+</html>

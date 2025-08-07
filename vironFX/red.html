@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gold Trading Dashboard - Dr. Viron</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #f3c623, #f9d342);
+      color: #333;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      color: #222;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .form-section, .stats-section {
+      background-color: #fff;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-top: 1rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .form-section input {
+      margin: 0.5rem;
+      padding: 0.5rem;
+    }
+    canvas {
+      margin-top: 1rem;
+    }
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Gold Trading Dashboard - Dr. Viron</h1>
+
+    <div class="form-section">
+      <h2>Record Trade</h2>
+      <label for="profitInput">Profit ($): </label>
+      <input type="number" id="profitInput" step="0.01">
+      <label for="lossInput">Loss ($): </label>
+      <input type="number" id="lossInput" step="0.01">
+      <button onclick="recordTrade()">Submit</button>
+    </div>
+
+    <div class="stats-section">
+      <h2>Summary</h2>
+      <div class="stats">
+        <div>Total Profit: $<span id="totalProfit">0</span></div>
+        <div>Total Loss: $<span id="totalLoss">0</span></div>
+        <div>Net P/L: $<span id="netPL">0</span></div>
+        <div>Withdrawal (60%): $<span id="withdrawal">0</span></div>
+      </div>
+    </div>
+
+    <canvas id="profitChart" width="400" height="200"></canvas>
+    <canvas id="pieChart" width="400" height="200"></canvas>
+  </div>
+
+  <script>
+    let profitData = [];
+    let lossData = [];
+
+    function recordTrade() {
+      const profit = parseFloat(document.getElementById('profitInput').value) || 0;
+      const loss = parseFloat(document.getElementById('lossInput').value) || 0;
+
+      if (profit > 0) profitData.push(profit);
+      if (loss > 0) lossData.push(loss);
+
+      updateDashboard();
+    }
+
+    function updateDashboard() {
+      const totalProfit = profitData.reduce((a, b) => a + b, 0);
+      const totalLoss = lossData.reduce((a, b) => a + b, 0);
+      const netPL = totalProfit - totalLoss;
+      const withdrawal = (netPL > 0) ? (netPL * 0.60).toFixed(2) : 0;
+
+      document.getElementById('totalProfit').textContent = totalProfit.toFixed(2);
+      document.getElementById('totalLoss').textContent = totalLoss.toFixed(2);
+      document.getElementById('netPL').textContent = netPL.toFixed(2);
+      document.getElementById('withdrawal').textContent = withdrawal;
+
+      renderCharts(totalProfit, totalLoss);
+    }
+
+    function renderCharts(totalProfit, totalLoss) {
+      const profitChart = new Chart(document.getElementById('profitChart'), {
+        type: 'bar',
+        data: {
+          labels: profitData.map((_, i) => `Trade ${i + 1}`),
+          datasets: [
+            {
+              label: 'Profit ($)',
+              data: profitData,
+              backgroundColor: 'green'
+            },
+            {
+              label: 'Loss ($)',
+              data: lossData,
+              backgroundColor: 'red'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'top' } }
+        }
+      });
+
+      const pieChart = new Chart(document.getElementById('pieChart'), {
+        type: 'pie',
+        data: {
+          labels: ['Profit', 'Loss'],
+          datasets: [{
+            data: [totalProfit, totalLoss],
+            backgroundColor: ['#28a745', '#dc3545']
+          }]
+        },
+        options: {
+          responsive: true
+        }
+      });
+    }
+  </script>
+</body>
+</html>
